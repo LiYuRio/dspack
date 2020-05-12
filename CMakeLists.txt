@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 project(dspack)
+set(CMAKE_CXX_STANDARD 11)
 
-add_executable(test_array_list
-  test/test_array_list.cpp
-)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-target_include_directories(test_array_list 
-  PRIVATE
-    ${PROJECT_SOURCE_DIR}/dspack
-)
+enable_testing()
+add_subdirectory(third_party/gtest)
+add_subdirectory(test)
