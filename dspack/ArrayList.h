@@ -1,5 +1,6 @@
 #pragma once
-#include <iostream>
+#include "utils/iterator_overflow.h"
+
 namespace dspack {
 template <typename T>
 class ArrayList {
@@ -17,6 +18,7 @@ class ArrayList {
   bool empty() const;
   int size() const;
   int capacity() const;
+  T* data();
 
   T& operator[](int index);
   T operator[](int index) const;
@@ -38,7 +40,7 @@ ArrayList<T>::ArrayList() {
 
 template <typename T>
 ArrayList<T>::ArrayList(int init_capacity) {
-  this->_size = 0;
+  this->_size = init_capacity;
   this->_capacity = init_capacity;
   this->_values = new T[init_capacity];
 }
@@ -60,14 +62,10 @@ ArrayList<T>& ArrayList<T>::operator=(const ArrayList<T>& rhs) {
 
 template <typename T>
 void ArrayList<T>::insert(int index, T new_value) {
-  if (index == 0 && this->_size == 0) {
-    append(new_value);
+  if (index > this->_size) {
+    throw iterator_overflow(index, this->_size);
   }
-  if (index >= this->_size) {
-    std::cout << "Invaild index" << std::endl;
-    return;
-  }
-  if (this->_size >= this->_capacity * 2 / 3) {
+  if (this->_size >= this->_capacity) {
     resize(this->_capacity * 2 + 10);
   }
   for (int i = this->_size - 1; i >= index; i--) {
@@ -79,7 +77,7 @@ void ArrayList<T>::insert(int index, T new_value) {
 
 template <typename T>
 void ArrayList<T>::append(T new_value) {
-  if (this->_size >= this->_capacity * 2 / 3) {
+  if (this->_size >= this->_capacity) {
     resize(this->_capacity * 2 + 10);
   }
   this->_values[this->_size] = new_value;
@@ -88,12 +86,11 @@ void ArrayList<T>::append(T new_value) {
 
 template <typename T>
 T ArrayList<T>::remove(int index) {
-  if (index >= this->_size) {
-    std::cout << "Invaild index" << std::endl;
-    exit(-1);
+  if (index > this->_size) {
+    throw iterator_overflow(index, this->_size);
   }
   if (this->_size <= this->_capacity / 3) {
-    resize(this->_capacity / 2);
+    resize(this->_size);
   }
   T value = this->_values[index];
   for (int i = index; i < this->_size - 1; i++) {
@@ -122,19 +119,22 @@ int ArrayList<T>::size() const {
 }
 
 template <typename T>
+T* ArrayList<T>::data() {
+  return this->_values;
+}
+
+template <typename T>
 T ArrayList<T>::operator[](int index) const {
-  if (index >= this->_size) {
-    std::cout << "Invaild index" << std::endl;
-    exit(-1);
+  if (index > this->_size) {
+    throw iterator_overflow(index, this->_size);
   }
   return this->_values[index];
 }
 
 template <typename T>
 T& ArrayList<T>::operator[](int index) {
-  if (index >= this->_size) {
-    std::cout << "Invaild index" << std::endl;
-    exit(-1);
+  if (index > this->_size) {
+    throw iterator_overflow(index, this->_size);
   }
   return this->_values[index];
 }
@@ -160,12 +160,3 @@ void ArrayList<T>::resize(int new_size) {
   this->_values = new_values;
 }
 }  // namespace dspack
-
-// template <typename T>
-// std::ostream &operator<<(std::ostream &os, const ArrayList<T> &rhs) {
-//   os << "( " << rhs.size() << ", " << rhs.capacity() << " )" << std::endl;
-//   for (int i = 0; i < rhs.size(); i++) {
-//     os << rhs[i] << " ";
-//   }
-//   os << std::endl;
-// }
